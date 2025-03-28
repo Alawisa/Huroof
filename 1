@@ -1,0 +1,97 @@
+import React, { useState, useEffect } from "react";
+import { Button, Input } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { motion } from "framer-motion";
+
+const ArabicLetters = [
+  "أ", "ب", "ت", "ث", "ج", "ح", "خ", "د", "ذ", "ر", 
+  "ز", "س", "ش", "ص", "ض", "ط", "ظ", "ع", "غ", "ف", 
+  "ق", "ك", "ل", "م", "ن", "هـ", "و", "ي"
+];
+
+const shuffleArray = (array) => {
+  return [...array].sort(() => Math.random() - 0.5);
+};
+
+export default function Game() {
+  const [step, setStep] = useState("home");
+  const [roomName, setRoomName] = useState("");
+  const [team1, setTeam1] = useState("");
+  const [team2, setTeam2] = useState("");
+  const [team1Color, setTeam1Color] = useState("green");
+  const [team2Color, setTeam2Color] = useState("red");
+  const [grid, setGrid] = useState(shuffleArray(ArabicLetters.map(letter => ({ letter, owner: null }))));
+  const [showQuestion, setShowQuestion] = useState(null);
+  const [questions, setQuestions] = useState([]);
+  const [userType, setUserType] = useState("subuser"); // 'admin' or 'subuser'
+  const [email, setEmail] = useState("");
+
+  useEffect(() => {
+    if (email === "alawisa17@gmail.com") {
+      setUserType("admin");
+    }
+  }, [email]);
+
+  const handleLetterClick = (index) => {
+    setShowQuestion(index);
+  };
+
+  const handleAnswer = (index, team) => {
+    const updatedGrid = [...grid];
+    updatedGrid[index].owner = team;
+    setGrid(updatedGrid);
+    setShowQuestion(null);
+  };
+
+  useEffect(() => {
+    checkWin();
+  }, [grid]);
+
+  const checkWin = () => {
+    for (let i = 0; i < 5; i++) {
+      if (grid.slice(i * 5, i * 5 + 5).every(cell => cell.owner === team1Color)) {
+        alert("🎉 مبروووووك الفوز 🎉");
+        return;
+      }
+      if (grid.filter((_, index) => index % 5 === i).every(cell => cell.owner === team2Color)) {
+        alert("🎉 مبرووووووك 🎉");
+        return;
+      }
+    }
+  };
+
+  return (
+    <div className="p-4 text-center" style={{ backgroundColor: team2Color, borderLeft: `10px solid ${team1Color}`, borderRight: `10px solid ${team1Color}` }}>
+      {step === "home" && (
+        <div>
+          <h1 className="text-2xl font-bold mb-4">Enter Room Name</h1>
+          <Input value={roomName} onChange={(e) => setRoomName(e.target.value)} placeholder="Game Name" />
+          <h2 className="text-xl font-bold mt-4">Teams</h2>
+          <div className="flex justify-between">
+            <Input value={team1} onChange={(e) => setTeam1(e.target.value)} placeholder="Team 1 Name" />
+            <Input type="color" value={team1Color} onChange={(e) => setTeam1Color(e.target.value)} />
+          </div>
+          <div className="flex justify-between mt-2">
+            <Input value={team2} onChange={(e) => setTeam2(e.target.value)} placeholder="Team 2 Name" />
+            <Input type="color" value={team2Color} onChange={(e) => setTeam2Color(e.target.value)} />
+          </div>
+          <Button onClick={() => setStep("game")} className="mt-4">Start Game</Button>
+        </div>
+      )}
+      {step === "game" && (
+        <div>
+          <h1 className="text-xl font-bold">Game Page</h1>
+          <div className="grid grid-cols-5 gap-0 mt-4 border-2 border-gray-800">
+            {grid.map((cell, index) => (
+              <Card key={index} className={`w-16 h-16 flex items-center justify-center text-lg font-bold cursor-pointer border-2 border-gray-900`} style={{ backgroundColor: cell.owner }} onClick={() => handleLetterClick(index)}>
+                <CardContent>{cell.letter}</CardContent>
+              </Card>
+            ))}
+          </div>
+          <Button onClick={() => setGrid(shuffleArray(grid))} className="mt-4">إعادة ترتيب الحروف</Button>
+          <Button onClick={() => setStep("home")} className="mt-4">إنهاء اللعبة</Button>
+        </div>
+      )}
+    </div>
+  );
+}
