@@ -50,11 +50,11 @@ export default function Game() {
   const checkWin = () => {
     for (let i = 0; i < 5; i++) {
       if (grid.slice(i * 5, i * 5 + 5).every(cell => cell.owner === team1Color)) {
-        alert("🎉 مبروووووك الفوز 🎉");
+        alert("🎉 مبروك لفريق 1 🎉");
         return;
       }
       if (grid.filter((_, index) => index % 5 === i).every(cell => cell.owner === team2Color)) {
-        alert("🎉 مبرووووووك 🎉");
+        alert("🎉 مبروك لفريق 2 🎉");
         return;
       }
     }
@@ -64,31 +64,38 @@ export default function Game() {
     <div className="p-4 text-center" style={{ backgroundColor: team2Color, borderLeft: `10px solid ${team1Color}`, borderRight: `10px solid ${team1Color}` }}>
       {step === "home" && (
         <div>
-          <h1 className="text-2xl font-bold mb-4">Enter Room Name</h1>
-          <Input value={roomName} onChange={(e) => setRoomName(e.target.value)} placeholder="Game Name" />
-          <h2 className="text-xl font-bold mt-4">Teams</h2>
+          <h1 className="text-2xl font-bold mb-4">أدخل اسم الغرفة</h1>
+          <Input value={roomName} onChange={(e) => setRoomName(e.target.value)} placeholder="اسم اللعبة" />
+          <h2 className="text-xl font-bold mt-4">الفرق</h2>
           <div className="flex justify-between">
-            <Input value={team1} onChange={(e) => setTeam1(e.target.value)} placeholder="Team 1 Name" />
+            <Input value={team1} onChange={(e) => setTeam1(e.target.value)} placeholder="اسم الفريق 1" />
             <Input type="color" value={team1Color} onChange={(e) => setTeam1Color(e.target.value)} />
           </div>
           <div className="flex justify-between mt-2">
-            <Input value={team2} onChange={(e) => setTeam2(e.target.value)} placeholder="Team 2 Name" />
+            <Input value={team2} onChange={(e) => setTeam2(e.target.value)} placeholder="اسم الفريق 2" />
             <Input type="color" value={team2Color} onChange={(e) => setTeam2Color(e.target.value)} />
           </div>
-          <Button onClick={() => setStep("game")} className="mt-4">Start Game</Button>
+          <Button onClick={() => setStep("game")} className="mt-4">ابدأ اللعبة</Button>
         </div>
       )}
       {step === "game" && (
         <div>
-          <h1 className="text-xl font-bold">Game Page</h1>
-          <div className="grid grid-cols-5 gap-0 mt-4 border-2 border-gray-800">
+          <h1 className="text-xl font-bold">صفحة اللعبة</h1>
+          <div className="grid grid-cols-5 gap-1 mt-4 border-2 border-gray-800">
             {grid.map((cell, index) => (
-              <Card key={index} className={`w-16 h-16 flex items-center justify-center text-lg font-bold cursor-pointer border-2 border-gray-900`} style={{ backgroundColor: cell.owner }} onClick={() => handleLetterClick(index)}>
+              <Card key={index} className={`w-16 h-16 flex items-center justify-center text-lg font-bold cursor-pointer border-2 border-gray-900`} style={{ backgroundColor: cell.owner || "white" }} onClick={() => handleLetterClick(index)}>
                 <CardContent>{cell.letter}</CardContent>
               </Card>
             ))}
           </div>
-          <Button onClick={() => setGrid(shuffleArray(grid))} className="mt-4">إعادة ترتيب الحروف</Button>
+          {showQuestion !== null && (
+            <div className="mt-4 p-2 bg-gray-200 border rounded">
+              <p className="text-lg font-bold">السؤال: {questions[showQuestion] || "سؤال غير متوفر"}</p>
+              <Button onClick={() => handleAnswer(showQuestion, team1Color)}>إجابة الفريق 1</Button>
+              <Button onClick={() => handleAnswer(showQuestion, team2Color)}>إجابة الفريق 2</Button>
+            </div>
+          )}
+          <Button onClick={() => setGrid(shuffleArray(grid.map(cell => ({ ...cell, owner: null }))))} className="mt-4">إعادة ترتيب الحروف</Button>
           <Button onClick={() => setStep("home")} className="mt-4">إنهاء اللعبة</Button>
         </div>
       )}
